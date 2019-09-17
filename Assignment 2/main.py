@@ -3,7 +3,7 @@ from .Map  import Map_Obj
 
 obj = Map_Obj()
 
-
+print('sup')
 
 def reconstruct_path(cameFrom, current, board):
     totalPath = []
