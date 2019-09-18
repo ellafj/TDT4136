@@ -5,6 +5,10 @@ import time
 from PIL import Image
 
 class Map_Obj():
+    path_cell = (1,2,3,4)
+    wall_cell = -1
+    starting_point = 'S'
+    goal_point = 'G'
     def __init__(self, task=1):
         self.start_pos, self.goal_pos, self.end_goal_pos, self.path_to_map = self.fill_critical_positions(task)
         self.int_map, self.str_map = self.read_map(self.path_to_map)
