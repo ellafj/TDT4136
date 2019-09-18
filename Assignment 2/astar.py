@@ -1,7 +1,5 @@
 from .Map import Map_Obj
-import A1functions
-
-a = euclidean(state)
+from .A1functions import euclidean, isGoal, reconstruct_path, generate_all_successors
 
 class search_node:
     """
@@ -32,22 +30,18 @@ def initialize_node(heuristic, state0):
     n0.f = n0.g + n0.h
     return n0
 
-
 def best_first_search(heuristic, state):
     closed = []
     open = []
-    node = initialize_node(heuristic, state)
-    open.append(node)
+    node0 = initialize_node(heuristic, state)
+    open.append(node0)
 
     while open:      # AGENDA-loop
         X = open.pop()
         closed.append(X)
+        if isGoal(X.state):
+            print('Found goal')
+            return reconstruct_path(X, node0)
+        SUCC = generate_all_successors(X)
 
 
-def reconstruct_path(cameFrom, current, board):
-    totalPath = []
-    while current.cameFrom.__ne__(board.start):
-        current = current.cameFrom
-        totalPath.insert(0, current)
-    totalPath.insert(0,current)
-    return totalPath
