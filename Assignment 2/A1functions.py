@@ -64,3 +64,21 @@ def initialize_child_node(parent, node):
     child.h = euclidean(child.state)
     child.f = child.g + child.f
     return child
+
+def attach_and_eval(parent, child):
+    child.parent = parent
+    child.g = parent.g + 1 #Since cost of moving is 1
+    child.h = euclidean(child.state)
+    child.f = child.g + child.h
+
+def sort_list(list):
+    sorted_list = sorted(list, key=lambda x: x.f)
+    return sorted_list
+
+def propagate_path_improvements(node):
+    for child in node.children:
+        if node.g + 1 < child.g:
+            child.parent = node
+            child.g = node.g + 1
+            child.f = child.g + child.h
+            propagate_path_improvements(child)
