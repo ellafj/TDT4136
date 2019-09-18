@@ -361,6 +361,5 @@ def main():
 
     map_obj.show_map()
     input()
-
 main()
 
