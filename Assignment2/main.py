@@ -1,4 +1,4 @@
-from Assignment2.Map import Map_Obj
+from .Map import Map_Obj
 from .astar import best_first_search
 
 def main():
