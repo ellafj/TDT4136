@@ -257,21 +257,25 @@ class search_node:
     def __str__(self):
         return "state is %s, parent is %s" % (self.state, self.parent)
 
-def initialize_node( state0):
+def initialize_node(state0):
     n0 = search_node(state=state0)
+    print(state0)
     n0.g = 0
     n0.h = euclidean(state0)
     n0.f = n0.g + n0.h
     return n0
 
 def euclidean(state):
-    map, *pos = state
-    goal = map.get_goal_pos()
-    return ((goal[0]-pos[0])**2+(goal[1]-pos[1])**2)**0.5
+    pos = state
+    print(pos)
+    goal = [40, 32]#map.get_goal_pos()
+    dist = ((goal[0]-pos[0])**2+(goal[1]-pos[1])**2)**0.5
+    print(dist)
+    return dist
 
 def isGoal(state):
-    map, x, y = state
-    return tuple(map.get_goal_pos()) == (x, y)
+    x, y = state
+    return tuple([40, 32]) == (x, y)
 
 def reconstruct_path(current, board):
     totalPath = []
@@ -282,8 +286,11 @@ def reconstruct_path(current, board):
     return totalPath
 
 def generate_all_successors(X):
-    map, x, y = X.state
-    (i,j) = map.int_map.shape
+    x, y = X.state
+    df = pd.read_csv('Samfundet_map_1.csv', index_col=None, header=None)#,error_bad_lines=False)
+    data = df.values
+    print(data)
+    (i,j) = data
     neigbours = [(1,0), (-1,0), (0,1), (0,-1)] # Maybe regular parenthis'?
     for x_dir, y_dir in neigbours:
         new_x = x + x_dir
@@ -294,7 +301,8 @@ def generate_all_successors(X):
             yield (map, new_x, new_y)
 
 def initialize_child_node(parent, node):
-    child = search_node(state=node.state, parent=parent)
+    state = node.state
+    child = search_node(state=state, parent=parent)
     child.g = parent.g + 1 # Since 1 is the cost of moving from one point to another
     child.h = euclidean(child.state)
     child.f = child.g + child.f
@@ -323,6 +331,7 @@ def best_first_search(state):
     closed = []
     open = []
     node0 = initialize_node(state)
+    print('node0', node0)
     open.append(node0)
     visited_nodes = {}
 
@@ -353,7 +362,8 @@ def best_first_search(state):
 
 def main():
     map_obj = Map_Obj()
-    state0 = (map_obj, *map_obj.get_start_pos())
+    state0 = [27, 18]#(map_obj, *map_obj.get_start_pos())
+    print('state0', state0)
 
     output = best_first_search(state0)
     for coords in output:
@@ -361,5 +371,6 @@ def main():
 
     map_obj.show_map()
     input()
+
 main()
 
