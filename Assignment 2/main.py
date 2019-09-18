@@ -3,7 +3,17 @@ from .Map  import Map_Obj
 
 obj = Map_Obj()
 
-print('sup')
+class Node:
+    def __init__(self, state=None, f=None, g=None, h=None, parent=None, child=None):
+        self.state = state
+        self.f = f
+        self.g = g
+        self.h = h
+        self.parent = parent
+        if child:
+            self.child = child
+        else:
+            self.child = []
 
 def reconstruct_path(cameFrom, current, board):
     totalPath = []
