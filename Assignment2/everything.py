@@ -265,12 +265,13 @@ def initialize_node( state0):
     return n0
 
 def euclidean(state):
-    map, *pos = state
+    map, pos = state
     goal = map.get_goal_pos()
-    return ((goal[0]-pos[0])**2+(goal[1]-pos[1])**2)**0.5
+    dist = ((goal[0]-pos[0])**2+(goal[1]-pos[1])**2)**0.5
+    return dist
 
 def isGoal(state):
-    map, x, y = state
+    map, (x, y) = state
     return tuple(map.get_goal_pos()) == (x, y)
 
 def reconstruct_path(current, board):
@@ -282,7 +283,7 @@ def reconstruct_path(current, board):
     return totalPath
 
 def generate_all_successors(X):
-    map, x, y = X.state
+    map, (x, y) = X.state
     (i,j) = map.int_map.shape
     neigbours = [(1,0), (-1,0), (0,1), (0,-1)] # Maybe regular parenthis'?
     for x_dir, y_dir in neigbours:
@@ -294,7 +295,9 @@ def generate_all_successors(X):
             yield (map, new_x, new_y)
 
 def initialize_child_node(parent, node):
-    child = search_node(state=node.state, parent=parent)
+    print(node)
+    state, x, y = node
+    child = search_node(state=node, parent=parent)
     child.g = parent.g + 1 # Since 1 is the cost of moving from one point to another
     child.h = euclidean(child.state)
     child.f = child.g + child.f
@@ -320,6 +323,7 @@ def propagate_path_improvements(node):
             propagate_path_improvements(child)
 
 def best_first_search(state):
+    print(state)
     closed = []
     open = []
     node0 = initialize_node(state)
@@ -353,7 +357,8 @@ def best_first_search(state):
 
 def main():
     map_obj = Map_Obj()
-    state0 = (map_obj, *map_obj.get_start_pos())
+    state0 = map_obj, map_obj.get_start_pos()
+    print(state0)
 
     output = best_first_search(state0)
     for coords in output:
@@ -362,4 +367,3 @@ def main():
     map_obj.show_map()
     input()
 main()
-
