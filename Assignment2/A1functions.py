@@ -22,10 +22,10 @@ class search_node:
         else:
             self.children = []
 
-def initialize_node(heuristic, state0):
+def initialize_node( state0):
     n0 = search_node(state=state0)
     n0.g = 0
-    n0.h = heuristic(state0)
+    n0.h = euclidean(state0)
     n0.f = n0.g + n0.h
     return n0
 

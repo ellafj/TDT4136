@@ -2,10 +2,10 @@ from .Map import Map_Obj
 from .A1functions import (initialize_node, euclidean, isGoal, reconstruct_path, generate_all_successors, initialize_child_node,
                           attach_and_eval, sort_list, propagate_path_improvements)
 
-def best_first_search(heuristic, state):
+def best_first_search(state):
     closed = []
     open = []
-    node0 = initialize_node(heuristic, state)
+    node0 = initialize_node(state)
     open.append(node0)
     visited_nodes = {}
 
