@@ -353,10 +353,12 @@ def best_first_search(state):
             #print('map', map)
             #print('(x,y)', (x,y))
             # Making child into node
-            if child in visited_nodes.items():
+            print('visited_nodes.keys()', visited_nodes.keys())
+            if key in visited_nodes.keys():
+                print('hello')
                 child_node = visited_nodes[key]
             else:
-                print(child)
+                print('sup')
                 child_node = initialize_child_node(X, child)
                 visited_nodes[key] = child_node
             (X.children).append(child_node)
@@ -375,11 +377,12 @@ def best_first_search(state):
             elif X.g + 1 < child_node.g: #and check == False:
                 print('Attaching!')
                 attach_and_eval(X, child_node)
+                print('yo',child_node)
                 if child_node in closed:
                     propagate_path_improvements(child_node)
 
 def main():
-    map_obj = Map_Obj(task=2)
+    map_obj = Map_Obj(task=1)
     state0 = map_obj, map_obj.get_start_pos()
     #print(state0)
 
