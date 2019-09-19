@@ -274,20 +274,10 @@ def isGoal(state):
     map, (x, y) = state
     return tuple(map.get_goal_pos()) == (x, y)
 
-def create_path_to(node):
-    # Base case
+def reconstruct_path(node):
     if node.parent is None:
         return [node]
-
-    return create_path_to(node.parent) + [node]
-
-def reconstruct_path(current, board):
-    totalPath = []
-    while current.parent != board.start:
-        current = current.parent
-        totalPath.insert(0, current)
-    totalPath.insert(0,current)
-    return totalPath
+    return reconstruct_path(node.parent)+[node]
 
 def generate_all_successors(X):
     map, (x, y) = X.state
@@ -303,7 +293,7 @@ def generate_all_successors(X):
             yield (map, [new_x, new_y])
 
 def initialize_child_node(parent, node):
-    print(node)
+    #print(node)
     child = search_node(state=node, parent=parent)
     child.g = parent.g + 1 # Since 1 is the cost of moving from one point to another
     child.h = euclidean(child.state)
@@ -335,8 +325,14 @@ def best_first_search(state):
     closed_state = []
     open_state = []
     node0 = initialize_node(state)
+    print('node0.state', node0.state)
     open.append(node0)
+    open_state.append(node0.state)
     visited_nodes = {}
+    map, (x, y) = node0.state
+    key = x*100+y
+    print('key', key)
+    visited_nodes[key] = node0
 
     while open:      # AGENDA-loop
         X = open.pop()
@@ -344,17 +340,17 @@ def best_first_search(state):
         closed_state.append(X.state)
         if isGoal(X.state):
             print('Found goal')
-            return create_path_to(X)
+            return reconstruct_path(X)
         children = generate_all_successors(X)
-        print('children', children)
+        #print('children', children)
         for child in children:
-            print('visited-nodes', visited_nodes)
+            #print('visited-nodes', visited_nodes)
             map, (x,y) = child
             key = x*100+y
             print('key', key)
-            print('child', child)
-            print('map', map)
-            print('(x,y)', (x,y))
+            #print('child', child)
+            #print('map', map)
+            #print('(x,y)', (x,y))
             # Making child into node
             if child in visited_nodes.items():
                 child_node = visited_nodes[key]
@@ -365,35 +361,33 @@ def best_first_search(state):
             (X.children).append(child_node)
             print('child_node.g', child_node.g)
             print('X.g + 1', X.g + 1)
-            check = False
 
+            # Checks if this is a new step
             if child_node.state not in open_state and child_node.state not in closed_state:
             #if child_node.state != o_node.state and child_node.state != c_node.state:
-                print('hello')
                 attach_and_eval(X, child_node)
                 open.append(child_node)
                 open_state.append(child_node.state)
                 open = sort_list(open)
-                print('open', open)
-                #check = True
+
+            # Checks if this is a shorter way to get to this node, if we've already been here
             elif X.g + 1 < child_node.g: #and check == False:
-                print('yo')
+                print('Attaching!')
                 attach_and_eval(X, child_node)
                 if child_node in closed:
                     propagate_path_improvements(child_node)
-            print('hey')
 
 def main():
     map_obj = Map_Obj()
     state0 = map_obj, map_obj.get_start_pos()
-    print(state0)
+    #print(state0)
 
-    output = best_first_search(state0)
-    print(output)
-    for coords in output:
-        map, pos = coords.state
+    path = best_first_search(state0)
+    #print(output)
+    for node in path:
+        map, pos = node.state
         print(pos)
-        map_obj.set_cell_value(pos, "☺", str_map = True)
+        map_obj.set_cell_value(pos, "o")#, str_map = True)
 
     map_obj.show_map()
     input()
