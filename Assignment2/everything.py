@@ -257,7 +257,7 @@ class search_node:
     def __str__(self):
         return "state is %s, parent is %s" % (self.state, self.parent)
 
-def initialize_node( state0):
+def initialize_node(state0):
     n0 = search_node(state=state0)
     n0.g = 0
     n0.h = euclidean(state0)
@@ -273,6 +273,13 @@ def euclidean(state):
 def isGoal(state):
     map, (x, y) = state
     return tuple(map.get_goal_pos()) == (x, y)
+
+def create_path_to(node):
+    # Base case
+    if node.parent is None:
+        return [node]
+
+    return create_path_to(node.parent) + [node]
 
 def reconstruct_path(current, board):
     totalPath = []
@@ -292,16 +299,15 @@ def generate_all_successors(X):
         if (new_x < 0) or (new_y < 0) or (new_x >= i) or (new_y >= j):
             continue
         if map.get_cell_value((new_x, new_y)) != Map_Obj.wall_cell:
-            yield (map, new_x, new_y)
+            print('[new_x, new_y]', [new_x, new_y])
+            yield (map, [new_x, new_y])
 
 def initialize_child_node(parent, node):
     print(node)
-    state, x, y = node
     child = search_node(state=node, parent=parent)
     child.g = parent.g + 1 # Since 1 is the cost of moving from one point to another
     child.h = euclidean(child.state)
-    child.f = child.g + child.f
-    print('child: ', child)
+    child.f = child.g + child.h
     return child
 
 def attach_and_eval(parent, child):
@@ -326,6 +332,8 @@ def best_first_search(state):
     print(state)
     closed = []
     open = []
+    closed_state = []
+    open_state = []
     node0 = initialize_node(state)
     open.append(node0)
     visited_nodes = {}
@@ -333,27 +341,47 @@ def best_first_search(state):
     while open:      # AGENDA-loop
         X = open.pop()
         closed.append(X)
+        closed_state.append(X.state)
         if isGoal(X.state):
             print('Found goal')
-            return reconstruct_path(X, node0)
+            return create_path_to(X)
         children = generate_all_successors(X)
+        print('children', children)
         for child in children:
+            print('visited-nodes', visited_nodes)
+            map, (x,y) = child
+            key = x*100+y
+            print('key', key)
+            print('child', child)
+            print('map', map)
+            print('(x,y)', (x,y))
             # Making child into node
-            if child in visited_nodes:
-                child_node = visited_nodes[child]
+            if child in visited_nodes.items():
+                child_node = visited_nodes[key]
             else:
                 print(child)
                 child_node = initialize_child_node(X, child)
-                visited_nodes[child] = child_node
+                visited_nodes[key] = child_node
             (X.children).append(child_node)
-            if child_node not in open and child_node not in closed:
+            print('child_node.g', child_node.g)
+            print('X.g + 1', X.g + 1)
+            check = False
+
+            if child_node.state not in open_state and child_node.state not in closed_state:
+            #if child_node.state != o_node.state and child_node.state != c_node.state:
+                print('hello')
                 attach_and_eval(X, child_node)
                 open.append(child_node)
+                open_state.append(child_node.state)
                 open = sort_list(open)
-            elif X.g + 1 < child_node.g:
+                print('open', open)
+                #check = True
+            elif X.g + 1 < child_node.g: #and check == False:
+                print('yo')
                 attach_and_eval(X, child_node)
                 if child_node in closed:
                     propagate_path_improvements(child_node)
+            print('hey')
 
 def main():
     map_obj = Map_Obj()
@@ -361,8 +389,11 @@ def main():
     print(state0)
 
     output = best_first_search(state0)
+    print(output)
     for coords in output:
-        map_obj.set_cell_value(coords, "☺", str_map = True)
+        map, pos = coords.state
+        print(pos)
+        map_obj.set_cell_value(pos, "☺", str_map = True)
 
     map_obj.show_map()
     input()
