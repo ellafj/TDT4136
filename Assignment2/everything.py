@@ -292,8 +292,7 @@ def generate_all_successors(X):
             print('[new_x, new_y]', [new_x, new_y])
             yield (map, [new_x, new_y])
 
-def initialize_child_node(parent, node):
-    #print(node)
+def initialize_child_node(parent, node): #works
     child = search_node(state=node, parent=parent)
     child.g = parent.g + 1 # Since 1 is the cost of moving from one point to another
     child.h = euclidean(child.state)
@@ -346,6 +345,8 @@ def best_first_search(state):
         for child in children:
             #print('visited-nodes', visited_nodes)
             map, (x,y) = child
+            print('child xy:', (x,y))
+            print('parent xy:', X.state)
             key = x*100+y
             print('key', key)
             #print('child', child)
@@ -378,7 +379,7 @@ def best_first_search(state):
                     propagate_path_improvements(child_node)
 
 def main():
-    map_obj = Map_Obj()
+    map_obj = Map_Obj(task=2)
     state0 = map_obj, map_obj.get_start_pos()
     #print(state0)
 
