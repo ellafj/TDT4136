@@ -255,7 +255,7 @@ class search_node:
         else:
             self.children = []
     def __str__(self):
-        return "state is %s, parent is %s" % (self.state, self.parent)
+        return "state is %s, parent.state is %s" % (self.state, self.parent)
 
 def initialize_node(state0):
     n0 = search_node(state=state0)
@@ -357,10 +357,12 @@ def best_first_search(state):
             if key in visited_nodes.keys():
                 print('hello')
                 child_node = visited_nodes[key]
+                print('this child:', child_node)
             else:
                 print('sup')
                 child_node = initialize_child_node(X, child)
                 visited_nodes[key] = child_node
+
             (X.children).append(child_node)
             print('child_node.g', child_node.g)
             print('X.g + 1', X.g + 1)
@@ -377,6 +379,7 @@ def best_first_search(state):
             elif X.g + 1 < child_node.g: #and check == False:
                 print('Attaching!')
                 attach_and_eval(X, child_node)
+                print('its children', X.children)
                 print('yo',child_node)
                 if child_node in closed:
                     propagate_path_improvements(child_node)
@@ -384,15 +387,12 @@ def best_first_search(state):
 def main():
     map_obj = Map_Obj(task=1)
     state0 = map_obj, map_obj.get_start_pos()
-    #print(state0)
-
     path = best_first_search(state0)
-    #print(output)
     for node in path:
         map, pos = node.state
         print(pos)
         map_obj.set_cell_value(pos, "o")#, str_map = True)
-
     map_obj.show_map()
     input()
+
 main()
