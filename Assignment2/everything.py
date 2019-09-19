@@ -268,11 +268,11 @@ def euclidean(state):
     map, pos = state
     goal = map.get_goal_pos()
     dist = ((goal[0]-pos[0])**2+(goal[1]-pos[1])**2)**0.5
-    """print('   ')
-    print('pos', pos)
-    print('goal', goal)
-    print('dist', dist)
-    print('   ')"""
+    #print('   ')
+    #print('pos', pos)
+    #print('goal', goal)
+    #print('dist', dist)
+    #print('   ')
     return dist
 """
 def euclidean(state):
@@ -284,15 +284,16 @@ def isGoal(state):
     map, (x, y) = state
     return tuple(map.get_goal_pos()) == (x, y)
 
-def reconstruct_path(node):
+def reconstruct_path(node, path):
     if node.parent is None:
-        return [node]
-    return reconstruct_path(node.parent)+[node]
+        return path
+    path.append(node.parent)
+    return reconstruct_path(node.parent,path)#+[node]
 
 def generate_all_successors(X):
     map, (x, y) = X.state
     (i,j) = map.int_map.shape
-    neigbours = [(1,0), (-1,0), (0,1), (0,-1), (1,1), (-1,-1), (1,-1),(-1,1)]
+    neigbours = [(1,0), (-1,0), (0,1), (0,-1)]#, (1,1), (-1,-1), (1,-1),(-1,1)]
     for x_dir, y_dir in neigbours:
         new_x = x + x_dir
         new_y = y + y_dir
@@ -324,7 +325,9 @@ def propagate_path_improvements(node):
         if node.g + 1 < child.g:
             child.parent = node
             child.g = node.g + 1
-            child.f = child.g #+ child.h
+            print('child.state', child.state)
+            print('child.h', child.h)
+            child.f = child.g + child.h
             #propagate_path_improvements(child)
 
 def best_first_search(state):
@@ -342,18 +345,21 @@ def best_first_search(state):
 
     while open:      # AGENDA-loop
         X = open.pop()
+        open_state.pop()    # This changes something
         print('X.state', X.state)
-        print('X.g', X.g)
-        print('X.h', X.h)
-        print('X.f', X.f)
+        #print('X.g', X.g)
+        #print('X.h', X.h)
+        #print('X.f', X.f)
         closed.append(X)
         closed_state.append(X.state)
 
         # If we're in target area
         if isGoal(X.state):
+            path = []
             print('Found goal')
             print('open', open)
-            return reconstruct_path(X)
+            reconstruct_path(X, path)
+            return path
         children = generate_all_successors(X)
 
         for child in children:
@@ -389,7 +395,7 @@ def best_first_search(state):
                 attach_and_eval(X, child_node)
                 #print('its children', X.children)
                 #print('yo',child_node)
-                if child_node in closed:
+                if child_node.state in closed_state:
                     propagate_path_improvements(child_node)
 
             #for item in open:
