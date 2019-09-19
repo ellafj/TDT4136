@@ -268,7 +268,17 @@ def euclidean(state):
     map, pos = state
     goal = map.get_goal_pos()
     dist = ((goal[0]-pos[0])**2+(goal[1]-pos[1])**2)**0.5
+    """print('   ')
+    print('pos', pos)
+    print('goal', goal)
+    print('dist', dist)
+    print('   ')"""
     return dist
+"""
+def euclidean(state):
+    map, pos = state
+    goal = map.get_goal_pos()
+    return abs(goal[0] - pos[0]) + abs(goal[1] - pos[1])"""
 
 def isGoal(state):
     map, (x, y) = state
@@ -282,14 +292,14 @@ def reconstruct_path(node):
 def generate_all_successors(X):
     map, (x, y) = X.state
     (i,j) = map.int_map.shape
-    neigbours = [(1,0), (-1,0), (0,1), (0,-1)] # Maybe regular parenthis'?
+    neigbours = [(1,0), (-1,0), (0,1), (0,-1), (1,1), (-1,-1), (1,-1),(-1,1)]
     for x_dir, y_dir in neigbours:
         new_x = x + x_dir
         new_y = y + y_dir
         if (new_x < 0) or (new_y < 0) or (new_x >= i) or (new_y >= j):
             continue
         if map.get_cell_value((new_x, new_y)) != Map_Obj.wall_cell:
-            print('[new_x, new_y]', [new_x, new_y])
+            #print('[new_x, new_y]', [new_x, new_y])
             yield (map, [new_x, new_y])
 
 def initialize_child_node(parent, node): #works
@@ -301,7 +311,7 @@ def initialize_child_node(parent, node): #works
 
 def attach_and_eval(parent, child):
     child.parent = parent
-    child.g = parent.g + 1 #Since cost of moving is 1
+    child.g = parent.g + 1 # Since cost of moving is 1
     child.h = euclidean(child.state)
     child.f = child.g + child.h
 
@@ -314,75 +324,77 @@ def propagate_path_improvements(node):
         if node.g + 1 < child.g:
             child.parent = node
             child.g = node.g + 1
-            child.f = child.g + child.h
-            propagate_path_improvements(child)
+            child.f = child.g #+ child.h
+            #propagate_path_improvements(child)
 
 def best_first_search(state):
-    print(state)
     closed = []
     open = []
     closed_state = []
     open_state = []
     node0 = initialize_node(state)
-    print('node0.state', node0.state)
     open.append(node0)
     open_state.append(node0.state)
     visited_nodes = {}
     map, (x, y) = node0.state
-    key = x*100+y
-    print('key', key)
+    key = x*100+y   # The unique identifier for the node
     visited_nodes[key] = node0
 
     while open:      # AGENDA-loop
         X = open.pop()
+        print('X.state', X.state)
+        print('X.g', X.g)
+        print('X.h', X.h)
+        print('X.f', X.f)
         closed.append(X)
         closed_state.append(X.state)
+
+        # If we're in target area
         if isGoal(X.state):
             print('Found goal')
+            print('open', open)
             return reconstruct_path(X)
         children = generate_all_successors(X)
-        #print('children', children)
+
         for child in children:
-            #print('visited-nodes', visited_nodes)
             map, (x,y) = child
-            print('child xy:', (x,y))
-            print('parent xy:', X.state)
             key = x*100+y
-            print('key', key)
-            #print('child', child)
-            #print('map', map)
             #print('(x,y)', (x,y))
+
             # Making child into node
-            print('visited_nodes.keys()', visited_nodes.keys())
+            #print('visited_nodes.keys()', visited_nodes.keys())
             if key in visited_nodes.keys():
-                print('hello')
+                #print('hello')
                 child_node = visited_nodes[key]
-                print('this child:', child_node)
+                #print('this child:', child_node)
             else:
-                print('sup')
+                #print('sup')
                 child_node = initialize_child_node(X, child)
                 visited_nodes[key] = child_node
 
             (X.children).append(child_node)
-            print('child_node.g', child_node.g)
-            print('X.g + 1', X.g + 1)
+            #print('child_node.f', child_node.f)
+            #print('X.f + 1', X.f + 1)
 
             # Checks if this is a new step
             if child_node.state not in open_state and child_node.state not in closed_state:
-            #if child_node.state != o_node.state and child_node.state != c_node.state:
                 attach_and_eval(X, child_node)
                 open.append(child_node)
                 open_state.append(child_node.state)
                 open = sort_list(open)
 
             # Checks if this is a shorter way to get to this node, if we've already been here
-            elif X.g + 1 < child_node.g: #and check == False:
-                print('Attaching!')
+            elif X.g + 1 < child_node.g:
+                #print('Attaching!')
                 attach_and_eval(X, child_node)
-                print('its children', X.children)
-                print('yo',child_node)
+                #print('its children', X.children)
+                #print('yo',child_node)
                 if child_node in closed:
                     propagate_path_improvements(child_node)
+
+            #for item in open:
+                #print('item.f', item.f)
+                #print('item.state', item.state)
 
 def main():
     map_obj = Map_Obj(task=1)
