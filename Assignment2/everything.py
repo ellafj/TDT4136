@@ -1,7 +1,6 @@
 import numpy as np
 np.set_printoptions(threshold=np.inf, linewidth=300)
 import pandas as pd
-import time
 from PIL import Image
 
 class Map_Obj():
@@ -289,16 +288,16 @@ def generate_all_successors(X):
         if map.get_cell_value((new_x, new_y)) != Map_Obj.wall_cell:
             yield (map, [new_x, new_y])
 
-def initialize_child_node(parent, node): #works
+def initialize_child_node(parent, node, task): #works
     child = search_node(state=node, parent=parent)
-    child.g = parent.g + 1 # Since 1 is the cost of moving from one point to another
+    child.g = parent.g + calculate_cost(child, parent, task)
     child.h = heuristic_euclidean(child.state)
     child.f = child.g + child.h
     return child
 
-def attach_and_eval(parent, child):
+def attach_and_eval(parent, child, task):
     child.parent = parent
-    child.g = parent.g + 1 # Since cost of moving is 1
+    child.g = parent.g + calculate_cost(child, parent, task)
     child.h = heuristic_euclidean(child.state)
     child.f = child.g + child.h
 
@@ -306,16 +305,25 @@ def sort_list(list):
     sorted_list = sorted(list, key=lambda x: x.f)
     return sorted_list
 
-def propagate_path_improvements(node):
+def propagate_path_improvements(node, task):
     for child in node.children:
-        if node.g + 1 < child.g:
+        cost = calculate_cost(child, node, task)
+        if node.g + cost < child.g:
             child.parent = node
-            child.g = node.g + 1
+            child.g = node.g + cost
             print('child.state', child.state)
             print('child.h', child.h)
             child.f = child.g + child.h
 
-def best_first_search(state):
+def calculate_cost(start_node, end_node, task=1):
+    if task == 1 or task == 2:
+        return 1
+    if task == 3:
+        map, pos = end_node
+        cost = end_node.get_cell_value(pos)
+        return cost
+
+def best_first_search(state, task=1):
     # Initializing variables
     closed = []
     open = []
@@ -340,6 +348,8 @@ def best_first_search(state):
         closed.append(X)
         closed_state.append(X.state)
 
+        print(X.state)
+
         # If we've reached our goal
         if isGoal(X.state):
             path = []
@@ -351,12 +361,13 @@ def best_first_search(state):
         for child in children:
             map, (x,y) = child
             key = x*100+y
+            cost = calculate_cost(X, child, task)
 
             if key in visited_nodes.keys():                         # Checks if we've already been to this node
                 child_node = visited_nodes[key]                     # If yes, fetches it's earlier values
 
             else:                                                   # Else, initializes node and saves it in dictionary
-                child_node = initialize_child_node(X, child)
+                child_node = initialize_child_node(X, child, task)
                 visited_nodes[key] = child_node
 
             # Adds child node to it's parents children
@@ -364,19 +375,19 @@ def best_first_search(state):
 
             # Checks if this is a new step
             if child_node.state not in open_state and child_node.state not in closed_state:
-                attach_and_eval(X, child_node)
+                attach_and_eval(X, child_node, task)
                 open.append(child_node)
                 open_state.append(child_node.state)
                 open = sort_list(open)
 
             # Checks if this is a shorter way to get to this node, if we've already been here
-            elif X.g + 1 < child_node.g:
-                attach_and_eval(X, child_node)
+            elif X.g + cost < child_node.g:
+                attach_and_eval(X, child_node, task)
                 if child_node.state in closed_state:
-                    propagate_path_improvements(child_node)
+                    propagate_path_improvements(child_node, task)
 
 def main():
-    map_obj = Map_Obj(task=1)
+    map_obj = Map_Obj(task=3)
     state0 = map_obj, map_obj.get_start_pos()
     path = best_first_search(state0)
     for node in path:
