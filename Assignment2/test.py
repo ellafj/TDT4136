@@ -1,6 +1,7 @@
 import numpy as np
 np.set_printoptions(threshold=np.inf, linewidth=300)
 import pandas as pd
+import time
 from PIL import Image
 
 class Map_Obj():
@@ -259,140 +260,157 @@ class search_node:
 def initialize_node(state0):
     n0 = search_node(state=state0)
     n0.g = 0
-    n0.h = heuristic_euclidean(state0)
+    n0.h = euclidean(state0)
     n0.f = n0.g + n0.h
     return n0
 
-def heuristic_euclidean(state):
+def euclidean(state):
     map, pos = state
     goal = map.get_goal_pos()
-    dist = ((pos[0]-goal[0])**2+(pos[1]-goal[1])**2)**0.5
+    dist = ((goal[0]-pos[0])**2+(goal[1]-pos[1])**2)**0.5
+    #print('   ')
+    #print('pos', pos)
+    #print('goal', goal)
+    #print('dist', dist)
+    #print('   ')
     return dist
+"""
+def euclidean(state):
+    map, pos = state
+    goal = map.get_goal_pos()
+    return abs(goal[0] - pos[0]) + abs(goal[1] - pos[1])"""
 
 def isGoal(state):
     map, (x, y) = state
     return tuple(map.get_goal_pos()) == (x, y)
 
 def reconstruct_path(node, path):
-    if node.parent == None:                     # If we've reached the 'top' level of our path
+    if node.parent is None:
         return path
     path.append(node.parent)
-    return reconstruct_path(node.parent,path)   # Else, do this again
+    return reconstruct_path(node.parent,path)#+[node]
 
 def generate_all_successors(X):
     map, (x, y) = X.state
+    (i,j) = map.int_map.shape
     neigbours = [(1,0), (-1,0), (0,1), (0,-1)]#, (1,1), (-1,-1), (1,-1),(-1,1)]
     for x_dir, y_dir in neigbours:
         new_x = x + x_dir
         new_y = y + y_dir
+        if (new_x < 0) or (new_y < 0) or (new_x >= i) or (new_y >= j):
+            continue
         if map.get_cell_value((new_x, new_y)) != Map_Obj.wall_cell:
+            #print('[new_x, new_y]', [new_x, new_y])
             yield (map, [new_x, new_y])
 
-def initialize_child_node(parent, node_state, task): #works
-    child = search_node(state=node_state, parent=parent)
-    child.g = parent.g + calculate_cost(parent, node_state, task)
-    child.h = heuristic_euclidean(child.state)
+def initialize_child_node(parent, node): #works
+    child = search_node(state=node, parent=parent)
+    child.g = parent.g + 1 # Since 1 is the cost of moving from one point to another
+    child.h = euclidean(child.state)
     child.f = child.g + child.h
     return child
 
-def attach_and_eval(parent, child, task):
+def attach_and_eval(parent, child):
     child.parent = parent
-    child.g = parent.g + calculate_cost(parent, child.state, task)
-    child.h = heuristic_euclidean(child.state)
+    child.g = parent.g + 1 # Since cost of moving is 1
+    child.h = euclidean(child.state)
     child.f = child.g + child.h
 
 def sort_list(list):
     sorted_list = sorted(list, key=lambda x: x.f)
     return sorted_list
 
-def propagate_path_improvements(node, task):
+def propagate_path_improvements(node):
     for child in node.children:
-        cost = calculate_cost(node.state, child.state, task)
-        if node.g + cost < child.g:
+        if node.g + 1 < child.g:
             child.parent = node
-            child.g = node.g + cost
+            child.g = node.g + 1
+            print('child.state', child.state)
+            print('child.h', child.h)
             child.f = child.g + child.h
+            #propagate_path_improvements(child)
 
-def calculate_cost(start_node, end_node, task):
-    if task == 1 or task == 2:
-        return 1
-    if task == 3 or task == 4:
-        map, pos = end_node
-        cost = map.get_cell_value(pos)
-        return cost
-
-def best_first_search(state, task):
-    # Initializing variables
+def best_first_search(state):
     closed = []
     open = []
     closed_state = []
     open_state = []
-
     node0 = initialize_node(state)
-    map, (x, y) = node0.state
-
     open.append(node0)
     open_state.append(node0.state)
-
     visited_nodes = {}
-
-    key = x*100+y                           # The unique identifier for the node, to use in the visited_nodes dictionary
+    map, (x, y) = node0.state
+    key = x*100+y   # The unique identifier for the node
     visited_nodes[key] = node0
 
-    # Starting the Agenda Loop
-    while open:
-        X = open.pop(0)
-        open_state.pop(0)    # This changes something
+    while open:      # AGENDA-loop
+        X = open.pop()
+        open_state.pop()    # This changes something
+        print('X.state', X.state)
+        #print('X.g', X.g)
+        #print('X.h', X.h)
+        #print('X.f', X.f)
         closed.append(X)
         closed_state.append(X.state)
 
-        print(X.state)
-
-        # If we've reached our goal
+        # If we're in target area
         if isGoal(X.state):
             path = []
-            reconstruct_path(X, path)   # Constructing the path we've moved from start to finish
+            print('Found goal')
+            print('open', open)
+            reconstruct_path(X, path)
             return path
-
         children = generate_all_successors(X)
 
         for child in children:
             map, (x,y) = child
             key = x*100+y
-            cost = calculate_cost(X, child, task)
+            #print('(x,y)', (x,y))
 
-            if key in visited_nodes.keys():                         # Checks if we've already been to this node
-                child_node = visited_nodes[key]                     # If yes, fetches it's earlier values
-
-            else:                                                   # Else, initializes node and saves it in dictionary
-                child_node = initialize_child_node(X, child, task)
+            # Making child into node
+            #print('visited_nodes.keys()', visited_nodes.keys())
+            if key in visited_nodes.keys():
+                #print('hello')
+                child_node = visited_nodes[key]
+                #print('this child:', child_node)
+            else:
+                #print('sup')
+                child_node = initialize_child_node(X, child)
                 visited_nodes[key] = child_node
 
-            # Adds child node to it's parents children
             (X.children).append(child_node)
+            #print('child_node.f', child_node.f)
+            #print('X.f + 1', X.f + 1)
 
             # Checks if this is a new step
             if child_node.state not in open_state and child_node.state not in closed_state:
-                attach_and_eval(X, child_node, task)
+                attach_and_eval(X, child_node)
                 open.append(child_node)
                 open_state.append(child_node.state)
                 open = sort_list(open)
 
             # Checks if this is a shorter way to get to this node, if we've already been here
-            elif X.g + cost < child_node.g:
-                attach_and_eval(X, child_node, task)
+            elif X.g + 1 < child_node.g:
+                #print('Attaching!')
+                attach_and_eval(X, child_node)
+                #print('its children', X.children)
+                #print('yo',child_node)
                 if child_node.state in closed_state:
-                    propagate_path_improvements(child_node, task)
+                    propagate_path_improvements(child_node)
+
+            #for item in open:
+                #print('item.f', item.f)
+                #print('item.state', item.state)
 
 def main():
-    task = 4
-    map_obj = Map_Obj(task=task)
+    map_obj = Map_Obj(task=2)
     state0 = map_obj, map_obj.get_start_pos()
-    path = best_first_search(state0, task=task)
+    path = best_first_search(state0)
     for node in path:
         map, pos = node.state
         print(pos)
-        map_obj.set_cell_value(pos, 'o')
+        map_obj.set_cell_value(pos, "o")#, str_map = True)
     map_obj.show_map()
+    input()
 
 main()
