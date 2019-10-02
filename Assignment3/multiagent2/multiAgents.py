@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -21,12 +21,12 @@ from game import Agent
 
 class ReflexAgent(Agent):
     """
-      A reflex agent chooses an action at each choice point by examining
-      its alternatives via a state evaluation function.
+    A reflex agent chooses an action at each choice point by examining
+    its alternatives via a state evaluation function.
 
-      The code below is provided as a guide.  You are welcome to change
-      it in any way you see fit, so long as you don't touch our method
-      headers.
+    The code below is provided as a guide.  You are welcome to change
+    it in any way you see fit, so long as you don't touch our method
+    headers.
     """
 
 
@@ -37,7 +37,7 @@ class ReflexAgent(Agent):
         getAction chooses among the best options according to the evaluation function.
 
         Just like in the previous project, getAction takes a GameState and returns
-        some Directions.X for some X in the set {North, South, West, East, Stop}
+        some Directions.X for some X in the set {NORTH, SOUTH, WEST, EAST, STOP}
         """
         # Collect legal moves and successor states
         legalMoves = gameState.getLegalActions()
@@ -79,27 +79,27 @@ class ReflexAgent(Agent):
 
 def scoreEvaluationFunction(currentGameState):
     """
-      This default evaluation function just returns the score of the state.
-      The score is the same one displayed in the Pacman GUI.
+    This default evaluation function just returns the score of the state.
+    The score is the same one displayed in the Pacman GUI.
 
-      This evaluation function is meant for use with adversarial search agents
-      (not reflex agents).
+    This evaluation function is meant for use with adversarial search agents
+    (not reflex agents).
     """
     return currentGameState.getScore()
 
 class MultiAgentSearchAgent(Agent):
     """
-      This class provides some common elements to all of your
-      multi-agent searchers.  Any methods defined here will be available
-      to the MinimaxPacmanAgent, AlphaBetaPacmanAgent & ExpectimaxPacmanAgent.
+    This class provides some common elements to all of your
+    multi-agent searchers.  Any methods defined here will be available
+    to the MinimaxPacmanAgent, AlphaBetaPacmanAgent & ExpectimaxPacmanAgent.
 
-      You *do not* need to make any changes here, but you can if you want to
-      add functionality to all your adversarial search agents.  Please do not
-      remove anything, however.
+    You *do not* need to make any changes here, but you can if you want to
+    add functionality to all your adversarial search agents.  Please do not
+    remove anything, however.
 
-      Note: this is an abstract class: one that should not be instantiated.  It's
-      only partially specified, and designed to be extended.  Agent (game.py)
-      is another abstract class.
+    Note: this is an abstract class: one that should not be instantiated.  It's
+    only partially specified, and designed to be extended.  Agent (game.py)
+    is another abstract class.
     """
 
     def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
@@ -109,45 +109,34 @@ class MultiAgentSearchAgent(Agent):
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
-      Your minimax agent (question 2)
+    Your minimax agent (question 2)
     """
-    #def minimax(self, depth, index, gameState):
-
-        # Checks if game is over
-        #if depth == self.depth or gameState.isWin() or gameState.isLose():
-            #return self.evaluationFunction(gameState)
-
-        # If not,
-
-    """def minimax(self, depth, maximizingPlayer, gameState, index):
-        if depth == 0 or gameState.isWin() or gameState.isLose():
-            if maximizingPlayer:
-                value = -np.inf
-                actions = gameState.getLegalActions(index)
-                successors = minimax(gameState.generateSuccessor(maximizingPlayer, action))"""
-
-
 
     def getAction(self, gameState):
         """
-          Returns the minimax action from the current gameState using self.depth
-          and self.evaluationFunction.
+        Returns the minimax action from the current gameState using self.depth
+        and self.evaluationFunction.
 
-          Here are some method calls that might be useful when implementing minimax.
+        Here are some method calls that might be useful when implementing minimax.
 
-          gameState.getLegalActions(agentIndex):
-            Returns a list of legal actions for an agent
-            agentIndex=0 means Pacman, ghosts are >= 1
+        gameState.getLegalActions(agentIndex):
+        Returns a list of legal actions for an agent
+        agentIndex=0 means Pacman, ghosts are >= 1
 
-          gameState.generateSuccessor(agentIndex, action):
-            Returns the successor game state after an agent takes an action
+        gameState.generateSuccessor(agentIndex, action):
+        Returns the successor game state after an agent takes an action
 
-          gameState.getNumAgents():
-            Returns the total number of agents in the game
+        gameState.getNumAgents():
+        Returns the total number of agents in the game
+
+        gameState.isWin():
+        Returns whether or not the game state is a winning state
+
+        gameState.isLose():
+        Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-
-        def minimax(self, gameState, index, depth, action):
+        def minimax(gameState, index, depth, action):
             value = -np.inf
             legalActions = gameState.getLegalActions(index)
             for possibleAction in legalActions:
@@ -160,9 +149,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         # For ghosts
         def minFunc(gameState, index, depth):
+            self.depth = 0
             # Checks if terminal node
-            if depth == self.depth or gameState.isWin() or gameState.isLose():
-                return gameState.evaluationFunction(gameState)
+            if (depth == self.depth or gameState.isWin() or gameState.isLose()):
+                return self.evaluationFunction(gameState)
 
             minValue = np.inf
             legalActions = gameState.getLegalActions(index)
@@ -182,7 +172,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         def maxFunc(gameState, index, depth):
             # Checks if terminal node
             if depth == self.depth or gameState.isWin() or gameState.isLose():
-                return gameState.evaluationFunction(gameState)
+                return self.evaluationFunction(gameState)
 
             maxValue = -np.inf
             legalActions = gameState.getLegalActions(0)
@@ -192,23 +182,18 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 maxValue = max(maxValue, minFunc(successor, 1, depth))
             return maxValue
 
-        return minimax(self, gameState, self.index, self.depth, self.action)
-
-
-
-
-
+        return minimax(gameState, self.index, self.depth, self.getAction)
 
         #util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
-      Your minimax agent with alpha-beta pruning (question 3)
+    Your minimax agent with alpha-beta pruning (question 3)
     """
 
     def getAction(self, gameState):
         """
-          Returns the minimax action using self.depth and self.evaluationFunction
+        Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
@@ -220,24 +205,23 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     def getAction(self, gameState):
         """
-          Returns the expectimax action using self.depth and self.evaluationFunction
+        Returns the expectimax action using self.depth and self.evaluationFunction
 
-          All ghosts should be modeled as choosing uniformly at random from their
-          legal moves.
+        All ghosts should be modeled as choosing uniformly at random from their
+        legal moves.
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
     """
-      Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-      evaluation function (question 5).
+    Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+    evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
 # Abbreviation
 better = betterEvaluationFunction
-
