@@ -136,35 +136,55 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        self.thisDepth = 0
-
+        # Starting function
         def minimax(gameState, index, depth, action):
             value = -np.inf
+
+            # Finds all possible actions for pacman
             legalActions = gameState.getLegalActions(index)
+            actions = []
+            values = []
+
+            # Checks each one to find the best one
             for possibleAction in legalActions:
-                check = value
+                maxValue = value
                 successor = gameState.generateSuccessor(index, possibleAction)
-                value = minFunc(successor, index+1, depth)
-                if check < value:
-                    action = possibleAction
+                value = minFunc(successor, index+1, depth) #switching to ghost
+                if maxValue < value:
+                    actions.append(possibleAction)
+                    values.append(maxValue)
+            index = values.index(max(values))
+            action = actions[index]
             return action
 
-        """
-        def minimax(gameState, index, depth, action):
-            legalActions = gameState.getLegalActions(0) # For Pacman
-            minValue = np.inf
+        """def minimax(gameState, index, depth, action):
+            legalActions = gameState.getLegalActions(index) # For Pacman
+            minValue = -np.inf
             i = 0
             indices = []
             for possibleAction in legalActions:
                 successor = gameState.generateSuccessor(index,possibleAction)
                 value = maxFunc(successor, index, depth+1)
-                if (minValue > value):
+                if (minValue < value):
                     minValue = value
                     indices.append(i)
                 i += 1
             return legalActions[random.choice(indices)]"""
 
-        # For ghosts
+        def maxFunc(gameState, index, depth):
+            # Checks if terminal node
+            if depth == self.depth or gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState)
+
+            maxValue = -np.inf
+            legalActions = gameState.getLegalActions(0) # for pacman
+
+            for possibleAction in legalActions:
+                successor = gameState.generateSuccessor(0, possibleAction)
+                maxValue = max(maxValue, minFunc(successor, 1, depth))
+
+            return maxValue
+
         def minFunc(gameState, index, depth):
             # Checks if terminal node
             if (depth == self.depth or gameState.isWin() or gameState.isLose()):
@@ -172,38 +192,16 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             minValue = np.inf
             legalActions = gameState.getLegalActions(index)
-            #successors = []
-            #for possibleAction in legalActions:
-                #successors.append(gameState.generateSuccessor(index, possibleAction))
 
-            if (index >= gameState.getNumAgents() - 1):
-                #for successor in successors:
+            if (index >= gameState.getNumAgents() - 1): # If there is more than one ghost in the game
                 for possibleAction in legalActions:
                     successor = gameState.generateSuccessor(index, possibleAction)
                     minValue = min(minValue, maxFunc(successor, index, depth+1))
             else:
-                #for successor in successors:
                 for possibleAction in legalActions:
                     successor = gameState.generateSuccessor(index, possibleAction)
                     minValue = min(minValue, minFunc(successor, index+1, depth))
             return minValue
-
-        # For Pacman
-        def maxFunc(gameState, index, depth):
-            # Checks if terminal node
-            if depth == self.depth or gameState.isWin() or gameState.isLose():
-                return self.evaluationFunction(gameState)
-
-            maxValue = -np.inf
-            legalActions = gameState.getLegalActions(0)
-            successors = []
-            index %= gameState.getNumAgents()-1
-            for possibleAction in legalActions:
-                successors.append(gameState.generateSuccessor(index, possibleAction))
-
-            for successor in successors:
-                maxValue = max(maxValue, minFunc(successor, index+1, depth))
-            return maxValue
 
         return minimax(gameState, self.index, 0, self.getAction)
 
