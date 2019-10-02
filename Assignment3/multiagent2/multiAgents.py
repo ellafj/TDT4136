@@ -149,6 +149,21 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     action = possibleAction
             return action
 
+        """
+        def minimax(gameState, index, depth, action):
+            legalActions = gameState.getLegalActions(0) # For Pacman
+            minValue = np.inf
+            i = 0
+            indices = []
+            for possibleAction in legalActions:
+                successor = gameState.generateSuccessor(index,possibleAction)
+                value = maxFunc(successor, index, depth+1)
+                if (minValue > value):
+                    minValue = value
+                    indices.append(i)
+                i += 1
+            return legalActions[random.choice(indices)]"""
+
         # For ghosts
         def minFunc(gameState, index, depth):
             # Checks if terminal node
@@ -161,7 +176,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             #for possibleAction in legalActions:
                 #successors.append(gameState.generateSuccessor(index, possibleAction))
 
-            if (index >= gameState.getNumAgents()-1):
+            if (index >= gameState.getNumAgents() - 1):
                 #for successor in successors:
                 for possibleAction in legalActions:
                     successor = gameState.generateSuccessor(index, possibleAction)
@@ -216,7 +231,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         Returns the expectimax action using self.depth and self.evaluationFunction
 
         All ghosts should be modeled as choosing uniformly at random from their
-        legal moves
+        legal moves.
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
