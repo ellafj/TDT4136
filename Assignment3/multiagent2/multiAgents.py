@@ -216,7 +216,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         Returns the expectimax action using self.depth and self.evaluationFunction
 
         All ghosts should be modeled as choosing uniformly at random from their
-        legal moves.
+        legal moves
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
