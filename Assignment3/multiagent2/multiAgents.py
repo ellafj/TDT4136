@@ -136,6 +136,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+        self.thisDepth = 0
+
         def minimax(gameState, index, depth, action):
             value = -np.inf
             legalActions = gameState.getLegalActions(index)
@@ -149,22 +151,25 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         # For ghosts
         def minFunc(gameState, index, depth):
-            self.depth = 0
             # Checks if terminal node
             if (depth == self.depth or gameState.isWin() or gameState.isLose()):
                 return self.evaluationFunction(gameState)
 
             minValue = np.inf
             legalActions = gameState.getLegalActions(index)
-            successors = []
-            for possibleAction in legalActions:
-                successors.append(gameState.generateSuccessor(index, possibleAction))
+            #successors = []
+            #for possibleAction in legalActions:
+                #successors.append(gameState.generateSuccessor(index, possibleAction))
 
             if (index >= gameState.getNumAgents()-1):
-                for successor in successors:
-                    minValue = min(minValue, maxFunc(successor, index+1, depth))
+                #for successor in successors:
+                for possibleAction in legalActions:
+                    successor = gameState.generateSuccessor(index, possibleAction)
+                    minValue = min(minValue, maxFunc(successor, index, depth+1))
             else:
-                for successor in successors:
+                #for successor in successors:
+                for possibleAction in legalActions:
+                    successor = gameState.generateSuccessor(index, possibleAction)
                     minValue = min(minValue, minFunc(successor, index+1, depth))
             return minValue
 
@@ -177,12 +182,15 @@ class MinimaxAgent(MultiAgentSearchAgent):
             maxValue = -np.inf
             legalActions = gameState.getLegalActions(0)
             successors = []
+            index %= gameState.getNumAgents()-1
             for possibleAction in legalActions:
-                successor = gameState.generateSuccessor(index, possibleAction)
-                maxValue = max(maxValue, minFunc(successor, 1, depth))
+                successors.append(gameState.generateSuccessor(index, possibleAction))
+
+            for successor in successors:
+                maxValue = max(maxValue, minFunc(successor, index+1, depth))
             return maxValue
 
-        return minimax(gameState, self.index, self.depth, self.getAction)
+        return minimax(gameState, self.index, 0, self.getAction)
 
         #util.raiseNotDefined()
 
