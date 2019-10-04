@@ -284,6 +284,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     maxValue = value
                     bestAction = possibleAction
 
+                # Storing the new alpha
                 alpha = max(alpha, maxValue)
 
             return bestAction
@@ -313,9 +314,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 # the best outcome, i.e. the one with the highest value.
                 maxValue = max(maxValue, minFunc(successor, 1, depth, alpha, beta))
 
+                # Pruning
                 if maxValue > beta:
                     return maxValue
 
+                # Storing the new alpha
                 alpha = max(alpha, maxValue)
 
             return maxValue
@@ -348,9 +351,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     # the best outcome, i.e. the one with the lowest value.
                     minValue = min(minValue, maxFunc(successor, index-1, depth+1, alpha, beta))
 
+                    # Pruning
                     if minValue < alpha:
                         return minValue
 
+                    # Storing the new beta
                     beta = min(beta, minValue)
 
             # If there are multiple ghosts
@@ -364,9 +369,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     # the best outcome, i.e. the one with the lowest value.
                     minValue = min(minValue, minFunc(successor, index+1, depth, alpha, beta))
 
+                    # Pruning
                     if minValue < alpha:
                         return minValue
 
+                    # Storing the new beta
                     beta = min(beta, minValue)
 
             return minValue
