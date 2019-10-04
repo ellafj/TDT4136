@@ -145,6 +145,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             # Setting value infeasibly high
             value = -np.inf
 
+            # Stores temporary best value
+            maxValue = value
+
             # Finds all possible actions for pacman
             legalActions = gameState.getLegalActions(index)
 
@@ -154,7 +157,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             # Checks each action to determine the best one
             for possibleAction in legalActions:
                 # Stores temporary best value
-                maxValue = value
+                #maxValue = value
 
                 # Generates how game will look after this possibleAction is taken
                 successor = gameState.generateSuccessor(index, possibleAction)
@@ -165,6 +168,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 # Checks if new value is better than the one we already have. If yes
                 # saves this action as the best action so far
                 if maxValue < value:
+                    maxValue = value
                     bestAction = possibleAction
 
             return bestAction
@@ -183,16 +187,16 @@ class MinimaxAgent(MultiAgentSearchAgent):
             maxValue = -np.inf
 
             # Finds all possible actions for pacman
-            legalActions = gameState.getLegalActions(index)
+            legalActions = gameState.getLegalActions(0)
 
             # Checks each action to determine the best one
             for possibleAction in legalActions:
                 # Generates how game will look after this possibleAction is taken
-                successor = gameState.generateSuccessor(index, possibleAction)
+                successor = gameState.generateSuccessor(0, possibleAction)
 
                 # Finds out what value the ghost will then play, if it plays optimally, and picks
                 # the best outcome, i.e. the one with the highest value.
-                maxValue = max(maxValue, minFunc(successor, index+1, depth))
+                maxValue = max(maxValue, minFunc(successor, 1, depth))
 
             return maxValue
 
@@ -222,7 +226,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
                     # Finds out what value pacman will then play, if it plays optimally, and picks
                     # the best outcome, i.e. the one with the lowest value.
-                    minValue = min(minValue, maxFunc(successor, index, depth+1))
+                    minValue = min(minValue, maxFunc(successor, index-1, depth+1))
 
             # If there are multiple ghosts
             else:
