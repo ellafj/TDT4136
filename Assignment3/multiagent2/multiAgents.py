@@ -136,76 +136,109 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        # Starting function
-        def minimax(gameState, index, depth, action):
+
+        # Starting function. Takes in:
+        #   gameState = how the game looks right now
+        #   index = index of agent, i.e. is this pacman or a ghost as they have different objectives
+        #   depth = how far down in the tree we are
+        def minimax(gameState, index, depth):
+            # Setting value infeasibly high
             value = -np.inf
 
             # Finds all possible actions for pacman
             legalActions = gameState.getLegalActions(index)
-            actions = []
-            values = []
 
-            # Checks each one to find the best one
+            # Initializes variable
+            bestAction = legalActions[0]
+
+            # Checks each action to determine the best one
             for possibleAction in legalActions:
+                # Stores temporary best value
                 maxValue = value
+
+                # Generates how game will look after this possibleAction is taken
                 successor = gameState.generateSuccessor(index, possibleAction)
-                value = minFunc(successor, index+1, depth) #switching to ghost
+
+                # Finds out what value the ghost will then play, if it plays optimally
+                value = minFunc(successor, index+1, depth+1)
+
+                # Checks if new value is better than the one we already have. If yes
+                # saves this action as the best action so far
                 if maxValue < value:
-                    actions.append(possibleAction)
-                    values.append(maxValue)
-            index = values.index(max(values))
-            action = actions[index]
-            return action
+                    bestAction = possibleAction
 
-        """def minimax(gameState, index, depth, action):
-            legalActions = gameState.getLegalActions(index) # For Pacman
-            minValue = -np.inf
-            i = 0
-            indices = []
-            for possibleAction in legalActions:
-                successor = gameState.generateSuccessor(index,possibleAction)
-                value = maxFunc(successor, index, depth+1)
-                if (minValue < value):
-                    minValue = value
-                    indices.append(i)
-                i += 1
-            return legalActions[random.choice(indices)]"""
+            return bestAction
 
+        # Function that simulates pacman's best move. Takes in:
+        #   gameState = how the game looks right now
+        #   index = index of agent, i.e. is this pacman or a ghost as they have different objectives
+        #   depth = how far down in the tree we are
         def maxFunc(gameState, index, depth):
-            # Checks if terminal node
-            if depth == self.depth or gameState.isWin() or gameState.isLose():
+
+            # Checks if terminal node. If yes, returns result of game
+            if depth == self.depth+1 or gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState)
 
+            # Sets value infeasibly low
             maxValue = -np.inf
-            legalActions = gameState.getLegalActions(0) # for pacman
 
+            # Finds all possible actions for pacman
+            legalActions = gameState.getLegalActions(index)
+
+            # Checks each action to determine the best one
             for possibleAction in legalActions:
-                successor = gameState.generateSuccessor(0, possibleAction)
-                maxValue = max(maxValue, minFunc(successor, 1, depth))
+                # Generates how game will look after this possibleAction is taken
+                successor = gameState.generateSuccessor(index, possibleAction)
+
+                # Finds out what value the ghost will then play, if it plays optimally, and picks
+                # the best outcome, i.e. the one with the highest value.
+                maxValue = max(maxValue, minFunc(successor, index+1, depth))
 
             return maxValue
 
+        # Function that simulates pacman's best move. Takes in:
+        #   gameState = how the game looks right now
+        #   index = index of agent, i.e. is this pacman or a ghost as they have different objectives
+        #   depth = how far down in the tree we are
         def minFunc(gameState, index, depth):
-            # Checks if terminal node
-            if (depth == self.depth or gameState.isWin() or gameState.isLose()):
+
+            # Checks if terminal node. If yes, returns result of game
+            if (depth == self.depth+1 or gameState.isWin() or gameState.isLose()):
                 return self.evaluationFunction(gameState)
 
+            # Sets value infeasibly high
             minValue = np.inf
+
+             # Finds all possible actions for ghost
             legalActions = gameState.getLegalActions(index)
 
-            if (index >= gameState.getNumAgents() - 1): # If there is more than one ghost in the game
+            # If there is only one ghost
+            if (index == gameState.getNumAgents() - 1):
+
+                # Checks each action to determine the best one
                 for possibleAction in legalActions:
+                    # Generates how game will look after this possibleAction is taken
                     successor = gameState.generateSuccessor(index, possibleAction)
+
+                    # Finds out what value pacman will then play, if it plays optimally, and picks
+                    # the best outcome, i.e. the one with the lowest value.
                     minValue = min(minValue, maxFunc(successor, index, depth+1))
+
+            # If there are multiple ghosts
             else:
+                # Checks each action to determine the best one
                 for possibleAction in legalActions:
+                    # Generates how game will look after this possibleAction is taken
                     successor = gameState.generateSuccessor(index, possibleAction)
+
+                    # Finds out what value the next ghost will then play, if it plays optimally, and picks
+                    # the best outcome, i.e. the one with the lowest value.
                     minValue = min(minValue, minFunc(successor, index+1, depth))
+
             return minValue
 
-        return minimax(gameState, self.index, 0, self.getAction)
-
-        #util.raiseNotDefined()
+        # Initializes pacman game at top of node tree
+        return minimax(gameState, self.index, 0)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
